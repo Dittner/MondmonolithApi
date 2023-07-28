@@ -1,4 +1,4 @@
-package de.dittner.todo.api;
+package de.mondmonolith.api;
 
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

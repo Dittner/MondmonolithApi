@@ -1,9 +1,9 @@
-package de.dittner.todo.api.controller;
+package de.mondmonolith.api.controller;
 
-import de.dittner.todo.api.controller.dto.UserDto;
-import de.dittner.todo.api.model.User;
-import de.dittner.todo.api.repository.UserRepo;
-import de.dittner.todo.api.security.SecurityConfig;
+import de.mondmonolith.api.controller.dto.UserDto;
+import de.mondmonolith.api.model.User;
+import de.mondmonolith.api.repository.UserRepo;
+import de.mondmonolith.api.security.SecurityConfig;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/v1/")

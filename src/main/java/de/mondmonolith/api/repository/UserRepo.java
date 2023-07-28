@@ -1,6 +1,6 @@
-package de.dittner.todo.api.repository;
+package de.mondmonolith.api.repository;
 
-import de.dittner.todo.api.model.User;
+import de.mondmonolith.api.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;

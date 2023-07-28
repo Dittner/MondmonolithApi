@@ -1,7 +1,7 @@
-package de.dittner.todo.api.repository;
+package de.mondmonolith.api.repository;
 
-import de.dittner.todo.api.model.User;
-import de.dittner.todo.api.security.SecurityConfig;
+import de.mondmonolith.api.model.User;
+import de.mondmonolith.api.security.SecurityConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
-package de.dittner.todo.api.security;
+package de.mondmonolith.api.security;
 
-import de.dittner.todo.api.repository.UserRepo;
+import de.mondmonolith.api.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

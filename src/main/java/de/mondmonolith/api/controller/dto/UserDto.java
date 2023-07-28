@@ -1,4 +1,4 @@
-package de.dittner.todo.api.controller.dto;
+package de.mondmonolith.api.controller.dto;
 
 public class UserDto {
     public Long id;

@@ -1,4 +1,4 @@
-package de.dittner.todo.api.model;
+package de.mondmonolith.api.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

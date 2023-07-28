@@ -1,4 +1,4 @@
-package de.dittner.todo.api.security;
+package de.mondmonolith.api.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
