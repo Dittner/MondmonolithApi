@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor //JPA требует, чтобы сущности имели конструктор без аргументов
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {

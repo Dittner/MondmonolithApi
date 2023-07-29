@@ -29,7 +29,6 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(HttpMethod.POST,"/api/v1/signup").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/auth").hasAnyAuthority(ADMIN, USER)
                         .requestMatchers(HttpMethod.GET,"/api/v1/users").hasAuthority(ADMIN)
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
