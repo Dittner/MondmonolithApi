@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/")
@@ -91,14 +92,17 @@ public class UserController {
     }
 
     @Transactional
-    @DeleteMapping("users")
-    public Response deleteDir(@AuthenticationPrincipal User user) {
+    @DeleteMapping("users/{userId}")
+    public Response deleteUser(@PathVariable("userId") Long userId, @AuthenticationPrincipal User user) {
         try {
-
-            pageRepo.deleteAllByUserId(user.getId());
-            docRepo.deleteAllByUserId(user.getId());
-            dirRepo.deleteAllByUserId(user.getId());
-            userRepo.deleteById(user.getId());
+            if (Objects.equals(userId, user.getId())) {
+                pageRepo.deleteAllByUserId(userId);
+                docRepo.deleteAllByUserId(userId);
+                dirRepo.deleteAllByUserId(userId);
+                userRepo.deleteById(userId);
+            } else {
+                return new Response("User not found", HttpStatus.NOT_FOUND);
+            }
 
             return new Response(HttpStatus.OK);
 

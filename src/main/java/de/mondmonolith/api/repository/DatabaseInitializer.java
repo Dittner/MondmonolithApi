@@ -29,8 +29,6 @@ public class DatabaseInitializer implements CommandLineRunner {
         }
 
         final List<User> defUsers = Arrays.asList(
-                //admin@mycompany.com:pwd => Basic YWRtaW5AbXljb21wYW55LmNvbTpwd2Q=
-                new User("admin@mycompany.com", encoder.encode("pwd"), SecurityConfig.ADMIN),
                 //user@mycompany.com:pwd => Basic dXNlckBteWNvbXBhbnkuY29tOnB3ZA==
                 new User("user@mycompany.com", encoder.encode("pwd"), SecurityConfig.USER)
         );
