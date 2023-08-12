@@ -1,10 +1,8 @@
 package de.mondmonolith.api.controller;
 
 import de.mondmonolith.api.controller.dto.DirDto;
-import de.mondmonolith.api.controller.dto.DocDto;
 import de.mondmonolith.api.controller.dto.Response;
 import de.mondmonolith.api.model.Dir;
-import de.mondmonolith.api.model.Doc;
 import de.mondmonolith.api.model.User;
 import de.mondmonolith.api.repository.DirRepo;
 import de.mondmonolith.api.repository.DocRepo;

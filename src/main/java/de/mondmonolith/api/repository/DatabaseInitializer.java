@@ -29,8 +29,8 @@ public class DatabaseInitializer implements CommandLineRunner {
         }
 
         final List<User> defUsers = Arrays.asList(
-                //user@mycompany.com:pwd => Basic dXNlckBteWNvbXBhbnkuY29tOnB3ZA==
-                new User("user@mycompany.com", encoder.encode("pwd"), SecurityConfig.USER)
+                new User("demo", encoder.encode("pwd"), SecurityConfig.USER),
+                new User("dev", encoder.encode("pwd"), SecurityConfig.USER)
         );
         defUsers.forEach(userRepo::save);
         log.info("Database initialized");

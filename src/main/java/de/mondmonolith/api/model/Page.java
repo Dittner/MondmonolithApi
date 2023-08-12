@@ -22,7 +22,7 @@ public class Page {
     @Column(name = "title", length = 100)
     private String title;
 
-    @Column
+    @Column(columnDefinition = "text[]")
     private String[] blocks;
 
     public Page(Long userId, Long docId, String title, String[] blocks) {

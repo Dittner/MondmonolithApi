@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/")
@@ -42,7 +43,7 @@ public class DocController {
             List<DocDto> res = new ArrayList<>(docRepo.findAllByDirId(dirId)
                     .stream()
                     .filter(doc -> doc.getUserId() == user.getId())
-                    .map(doc -> new DocDto(doc.getId(), dirId, doc.getTitle()))
+                    .map(doc -> new DocDto(doc.getId(), dirId, doc.getTitle(), doc.getPublicKey()))
                     .toList());
 
             if (res.isEmpty()) {
@@ -66,12 +67,12 @@ public class DocController {
 
             Dir dir = dirRepo.findById(dirId).orElse(null);
 
-            if (dir == null || dir.getUserId() != user.getId()) {
+            if (dir == null || !Objects.equals(dir.getUserId(), user.getId())) {
                 return new Response("Dir not found", HttpStatus.BAD_REQUEST);
             }
 
-            Doc doc = docRepo.save(new Doc(user.getId(), dirId, request.title));
-            return new Response(new DocDto(doc.getId(), doc.getDirId(), doc.getTitle()), HttpStatus.CREATED);
+            Doc doc = docRepo.save(new Doc(user.getId(), dirId, request.title, ""));
+            return new Response(new DocDto(doc.getId(), doc.getDirId(), doc.getTitle(), doc.getPublicKey()), HttpStatus.CREATED);
         } catch (Exception e) {
             return new Response(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -87,19 +88,20 @@ public class DocController {
             }
 
             Doc doc = docRepo.findById(request.id).orElse(null);
-            if (doc == null || doc.getUserId() != user.getId()) {
+            if (doc == null || !Objects.equals(doc.getUserId(), user.getId())) {
                 return new Response("Doc not found", HttpStatus.NOT_FOUND);
             }
 
-            if (dirId != request.dirId) {
+            if (!Objects.equals(dirId, request.dirId)) {
                 Dir dir = dirRepo.findById(request.dirId).orElse(null);
-                if (dir == null || dir.getUserId() != user.getId()) {
+                if (dir == null || !Objects.equals(dir.getUserId(), user.getId())) {
                     return new Response("Dir not found", HttpStatus.NOT_FOUND);
                 }
             }
 
             doc.setDirId(request.dirId);
             doc.setTitle(request.title);
+            doc.setPublicKey(request.publicKey);
             docRepo.save(doc);
             return new Response(HttpStatus.OK);
 
@@ -114,7 +116,7 @@ public class DocController {
                               @AuthenticationPrincipal User user) {
         try {
             Doc doc = docRepo.findById(docId).orElse(null);
-            if (doc == null || doc.getUserId() != user.getId()) {
+            if (doc == null || !Objects.equals(doc.getUserId(), user.getId())) {
                 return new Response("Doc not found", HttpStatus.NOT_FOUND);
             }
 

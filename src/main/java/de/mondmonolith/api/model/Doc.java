@@ -22,9 +22,13 @@ public class Doc {
     @Column(name = "title", length = 100)
     private String title;
 
-    public Doc(Long userId, Long dirId, String title) {
+    @Column(name = "public_key", length = 50)
+    private String publicKey;
+
+    public Doc(Long userId, Long dirId, String title, String publicKey) {
         this.userId = userId;
         this.dirId = dirId;
         this.title = title;
+        this.publicKey = publicKey;
     }
 }
