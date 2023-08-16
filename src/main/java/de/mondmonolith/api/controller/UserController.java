@@ -41,7 +41,7 @@ public class UserController {
     @PostMapping("signup")
     public Response signUp(@Valid @RequestBody SignUpRequest request) {
         if (request.username.equals("")) {
-            return new Response("An email is required", HttpStatus.BAD_REQUEST);
+            return new Response("Email is required", HttpStatus.BAD_REQUEST);
         }
 
         EmailValidator validator = new EmailValidator();
@@ -54,13 +54,13 @@ public class UserController {
         }
 
         if (userRepo.findByUsername(request.username).isPresent()) {
-            return new Response("A user «" + request.username + "» is already signed up", HttpStatus.CONFLICT);
+            return new Response("User «" + request.username + "» is already signed up", HttpStatus.CONFLICT);
         }
 
         User user = new User(request.username, encoder.encode(request.password), SecurityConfig.USER);
         userRepo.save(user);
 
-        return new Response(HttpStatus.CREATED);
+        return new Response(new UserDto(user.getId(), user.getUsername(), user.getRole()), HttpStatus.CREATED);
     }
 
     @GetMapping("auth")
@@ -116,8 +116,7 @@ class SignUpRequest {
     public String username;
     public String password;
 
-    public SignUpRequest() {
-    }
+    public SignUpRequest() {}
 }
 
 class EmailValidator {
