@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/api/v1/**").permitAll()
                         .requestMatchers("/api/v1/public").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/signup/code").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAuthority(ADMIN)
                         .anyRequest().authenticated())
                 .httpBasic(conf -> conf

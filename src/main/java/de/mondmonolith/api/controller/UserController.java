@@ -8,18 +8,19 @@ import de.mondmonolith.api.repository.DocRepo;
 import de.mondmonolith.api.repository.PageRepo;
 import de.mondmonolith.api.repository.UserRepo;
 import de.mondmonolith.api.security.SecurityConfig;
+import de.mondmonolith.api.service.EmailService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/")
 public class UserController {
@@ -38,15 +39,24 @@ public class UserController {
     @Autowired
     PasswordEncoder encoder;
 
+    @Autowired
+    EmailService emailService;
+
+    Map<String, String> verificationCodeCache = new HashMap<>();
+
     @PostMapping("signup")
     public Response signUp(@Valid @RequestBody SignUpRequest request) {
         if (request.username.equals("")) {
             return new Response("Email is required", HttpStatus.BAD_REQUEST);
         }
 
+        if (request.verificationCode.equals("")) {
+            return new Response("Verification code is required", HttpStatus.BAD_REQUEST);
+        }
+
         EmailValidator validator = new EmailValidator();
         if (!validator.validate(request.username)) {
-            return new Response("The email «" + request.username + "» is not valid", HttpStatus.BAD_REQUEST);
+            return new Response("Email «" + request.username + "» is incorrect", HttpStatus.BAD_REQUEST);
         }
 
         if (request.password.equals("")) {
@@ -57,10 +67,59 @@ public class UserController {
             return new Response("User «" + request.username + "» is already signed up", HttpStatus.CONFLICT);
         }
 
+        if (!verificationCodeCache.containsKey(request.username)) {
+            return new Response("Verification code is not generated", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!Objects.equals(verificationCodeCache.get(request.username), request.verificationCode)) {
+            return new Response("Verification code is incorrect", HttpStatus.BAD_REQUEST);
+        }
+
         User user = new User(request.username, encoder.encode(request.password), SecurityConfig.USER);
         userRepo.save(user);
 
+        verificationCodeCache.remove(request.username);
+
         return new Response(new UserDto(user.getId(), user.getUsername(), user.getRole()), HttpStatus.CREATED);
+    }
+
+
+    @PostMapping("signup/code")
+    public Response generateCode(@Valid @RequestBody SignUpRequest request) {
+        if (request.username.equals("")) {
+            return new Response("Email is required", HttpStatus.BAD_REQUEST);
+        }
+
+        EmailValidator validator = new EmailValidator();
+        if (!validator.validate(request.username)) {
+            return new Response("Email «" + request.username + "» is incorrect", HttpStatus.BAD_REQUEST);
+        }
+
+        if (userRepo.findByUsername(request.username).isPresent()) {
+            return new Response("User «" + request.username + "» is already signed up", HttpStatus.CONFLICT);
+        }
+
+        log.info("signup/code: Sending email to: " + request.username);
+        log.info("signup/code: verificationCodeMap size: " + verificationCodeCache.size());
+        try {
+            final String code = generateCode();
+            verificationCodeCache.put(request.username, code);
+            log.info("signup/code: sending code (" + code + ")...");
+            emailService.sendVerificationCode(request.username, code);
+            return new Response(HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new Response(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private static final char[] digits = "0123456789".toCharArray();
+    private static final Random random = new Random();
+
+    private String generateCode() {
+        char[] buf = new char[6];
+        for (int i = 0; i < buf.length; ++i)
+            buf[i] = digits[random.nextInt(digits.length)];
+        return new String(buf);
     }
 
     @GetMapping("auth")
@@ -115,8 +174,10 @@ public class UserController {
 class SignUpRequest {
     public String username;
     public String password;
+    public String verificationCode;
 
-    public SignUpRequest() {}
+    public SignUpRequest() {
+    }
 }
 
 class EmailValidator {

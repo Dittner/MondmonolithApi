@@ -3,3 +3,4 @@
 /mvnw
 /mvnw.cmd
 *.iml
+/src/main/resources/env.properties

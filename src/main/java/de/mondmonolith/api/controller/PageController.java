@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/dirs/{dirId}/")
@@ -86,7 +87,7 @@ public class PageController {
                 return new Response("Page not found", HttpStatus.NOT_FOUND);
             }
 
-            if (docId != request.docId) {
+            if (!Objects.equals(docId, request.docId)) {
                 Doc doc = docRepo.findById(request.docId).orElse(null);
                 if (doc == null || doc.getUserId() != user.getId()) {
                     return new Response("Doc not found", HttpStatus.NOT_FOUND);
@@ -109,7 +110,7 @@ public class PageController {
                                @AuthenticationPrincipal User user) {
         try {
             Page page = pageRepo.findById(pageId).orElse(null);
-            if (page == null || page.getUserId() != user.getId()) {
+            if (page == null || !Objects.equals(page.getUserId(), user.getId())) {
                 return new Response("Page not found", HttpStatus.NOT_FOUND);
             }
 
