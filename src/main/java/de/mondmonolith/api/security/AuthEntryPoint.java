@@ -11,11 +11,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Component("restAuthenticationEntryPoint")
-public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
+@Component("authEntryPoint")
+public class AuthEntryPoint implements AuthenticationEntryPoint {
 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authenticationException) throws IOException, ServletException {
-        //response.setHeader("WWW-Authenticate", "Basic realm=\"Realm\"");
+        System.out.println("AuthEntryPoint::commence...");
+        response.setHeader("WWW-Authenticate", "Bearer");
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type, Accept");

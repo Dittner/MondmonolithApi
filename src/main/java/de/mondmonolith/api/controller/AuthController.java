@@ -1,12 +1,15 @@
 package de.mondmonolith.api.controller;
 
+import de.mondmonolith.api.controller.dto.AuthRequest;
 import de.mondmonolith.api.controller.dto.Response;
+import de.mondmonolith.api.controller.dto.SignUpRequest;
 import de.mondmonolith.api.controller.dto.UserDto;
 import de.mondmonolith.api.model.User;
 import de.mondmonolith.api.repository.DirRepo;
 import de.mondmonolith.api.repository.DocRepo;
 import de.mondmonolith.api.repository.PageRepo;
 import de.mondmonolith.api.repository.UserRepo;
+import de.mondmonolith.api.security.JwtTokenPublisher;
 import de.mondmonolith.api.security.SecurityConfig;
 import de.mondmonolith.api.service.EmailService;
 import jakarta.transaction.Transactional;
@@ -23,7 +26,7 @@ import java.util.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/")
-public class UserController {
+public class AuthController {
     @Autowired
     UserRepo userRepo;
 
@@ -75,12 +78,23 @@ public class UserController {
             return new Response("Verification code is incorrect", HttpStatus.BAD_REQUEST);
         }
 
-        User user = new User(request.username, encoder.encode(request.password), SecurityConfig.USER);
-        userRepo.save(user);
+        try {
+            User user = new User(request.username,
+                    encoder.encode(request.password),
+                    SecurityConfig.USER,
+                    JwtTokenPublisher.generateRandomTokenSecret());
 
-        verificationCodeCache.remove(request.username);
+            final String token = JwtTokenPublisher.generateToken(user);
 
-        return new Response(new UserDto(user.getId(), user.getUsername(), user.getRole()), HttpStatus.CREATED);
+            userRepo.save(user);
+
+            verificationCodeCache.remove(request.username);
+
+            return new Response(new UserDto(user.getId(), user.getUsername(), user.getRole(), token), HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.err.println("Error by generating Jwt-token: " + e.getMessage());
+            return new Response("Unable to generate token", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -122,14 +136,39 @@ public class UserController {
         return new String(buf);
     }
 
-    @GetMapping("auth")
-    public Response auth(@AuthenticationPrincipal User user) {
+    @PostMapping("auth")
+    public Response auth(@Valid @RequestBody AuthRequest request) {
         try {
-            return new Response(new UserDto(user.getId(), user.getUsername(), user.getRole()), HttpStatus.OK);
+            final User user = userRepo.findByUsername(request.username).orElse(null);
+            if (user == null) {
+                return new Response("User not found", HttpStatus.UNAUTHORIZED);
+            }
+
+            if(encoder.matches(request.password, user.getPassword())) {
+                final String token = JwtTokenPublisher.generateToken(user);
+                return new Response(new UserDto(user.getId(), user.getUsername(), user.getRole(), token), HttpStatus.OK);
+            } else {
+                return new Response("Incorrect password", HttpStatus.UNAUTHORIZED);
+            }
         } catch (Exception e) {
             return new Response(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("auth/token")
+    public Response refreshToken(@AuthenticationPrincipal User user) {
+        try {
+            if (user != null) {
+                final String token = JwtTokenPublisher.generateToken(user);
+                return new Response(new UserDto(user.getId(), user.getUsername(), user.getRole(), token), HttpStatus.OK);
+            } else {
+                return new Response("User not found", HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            return new Response(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @GetMapping("users")
     public Response getAllUsers() {
@@ -137,7 +176,7 @@ public class UserController {
 
             List<UserDto> res = new ArrayList<>(userRepo.findAll()
                     .stream()
-                    .map(u -> new UserDto(u.getId(), u.getUsername(), u.getRole()))
+                    .map(u -> new UserDto(u.getId(), u.getUsername(), u.getRole(), ""))
                     .toList());
 
             if (res.isEmpty()) {
@@ -171,14 +210,6 @@ public class UserController {
     }
 }
 
-class SignUpRequest {
-    public String username;
-    public String password;
-    public String verificationCode;
-
-    public SignUpRequest() {
-    }
-}
 
 class EmailValidator {
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";

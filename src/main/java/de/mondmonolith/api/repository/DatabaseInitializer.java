@@ -1,6 +1,7 @@
 package de.mondmonolith.api.repository;
 
 import de.mondmonolith.api.model.User;
+import de.mondmonolith.api.security.JwtTokenPublisher;
 import de.mondmonolith.api.security.SecurityConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +30,8 @@ public class DatabaseInitializer implements CommandLineRunner {
         }
 
         final List<User> defUsers = Arrays.asList(
-                new User("demo", encoder.encode("pwd"), SecurityConfig.USER),
-                new User("dev", encoder.encode("pwd"), SecurityConfig.USER)
+                new User("demo", encoder.encode("pwd"), SecurityConfig.USER, JwtTokenPublisher.generateRandomTokenSecret()),
+                new User("dev", encoder.encode("pwd"), SecurityConfig.USER, JwtTokenPublisher.generateRandomTokenSecret())
         );
         defUsers.forEach(userRepo::save);
         log.info("Database initialized");

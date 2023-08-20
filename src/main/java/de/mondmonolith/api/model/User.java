@@ -27,10 +27,14 @@ public class User implements UserDetails {
     @Column(name="role", length=20)
     private String role;
 
-    public User(String name, String password, String role) {
+    @Column(name="secret", length=256)
+    private byte[] tokenSecret;
+
+    public User(String name, String password, String role, byte[] tokenSecret) {
         this.username = name;
         this.password = password;
         this.role = role;
+        this.tokenSecret = tokenSecret;
     }
 
     @Override
@@ -42,6 +46,9 @@ public class User implements UserDetails {
     public String getUsername() {
         return username;
     }
+
+    @Override
+    public String getPassword() { return password; }
 
     @Override
     public boolean isAccountNonExpired() {
